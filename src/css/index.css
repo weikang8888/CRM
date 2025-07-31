@@ -1,0 +1,15 @@
+.MuiSelect-select.MuiInputBase-input.MuiFilledInput-input {
+  padding-left: 0 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  color: currentColor !important;
+}
+
+.MuiSelect-select.MuiInputBase-input.MuiOutlinedInput-input {
+  padding-left: 0 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 400 !important;
+  color: currentColor !important;
+  margin-bottom: 0 !important;
+}
