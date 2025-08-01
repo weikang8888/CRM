@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:3005/crm',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3005/crm',
 });
 
 API.interceptors.request.use(
