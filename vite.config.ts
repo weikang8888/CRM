@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import checker from 'vite-plugin-checker';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import tsconfigPaths from 'vite-tsconfig-paths'
+import checker from 'vite-plugin-checker'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,14 +10,10 @@ export default defineConfig({
     tsconfigPaths(),
     checker({
       typescript: true,
-      eslint: {
-        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
-      },
     }),
   ],
   build: {
-    outDir: 'build',
-    chunkSizeWarningLimit: 1000,
+    outDir: 'dist',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -28,11 +24,11 @@ export default defineConfig({
     },
   },
   server: {
-    host: '0.0.0.0',
     port: 3000,
+    host: true,
   },
   preview: {
-    port: 5000,
+    port: 3000,
+    host: true,
   },
-  base: '/',
-});
+}) 
