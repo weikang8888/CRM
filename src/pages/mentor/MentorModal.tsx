@@ -11,6 +11,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
+import CircularProgress from '@mui/material/CircularProgress';
 import { MentorPayload } from '../../api/mentor/mentor';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -39,7 +40,13 @@ const MentorModal: React.FC<MentorModalProps> = ({
   const [avatar, setAvatar] = useState<File | string | undefined>(initialValues?.avatar);
   const [positions, setPositions] = useState<string[]>([]);
   const [positionsLoading, setPositionsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ firstName?: string; lastName?: string; email?: string; position?: string }>({});
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [errors, setErrors] = useState<{
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    position?: string;
+  }>({});
 
   React.useEffect(() => {
     setFirstName(initialValues?.firstName || '');
@@ -56,8 +63,9 @@ const MentorModal: React.FC<MentorModalProps> = ({
       .finally(() => setPositionsLoading(false));
   }, []);
 
-  const handleCreate = () => {
-    const newErrors: { firstName?: string; lastName?: string; email?: string; position?: string } = {};
+  const handleCreate = async () => {
+    const newErrors: { firstName?: string; lastName?: string; email?: string; position?: string } =
+      {};
     if (!firstName) newErrors.firstName = 'First name is required';
     if (!lastName) newErrors.lastName = 'Last name is required';
     if (!email) newErrors.email = 'Email is required';
@@ -65,15 +73,23 @@ const MentorModal: React.FC<MentorModalProps> = ({
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    if (onSubmit) {
-      onSubmit({ firstName, lastName, email, position, avatar });
+    setSubmitLoading(true);
+    try {
+      if (onSubmit) {
+        await onSubmit({ firstName, lastName, email, position, avatar });
+      }
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      setPosition('');
+      setAvatar(undefined);
+      onClose();
+    } catch (error) {
+      // Error handling is done in the parent component
+      console.error('Mentor submission error:', error);
+    } finally {
+      setSubmitLoading(false);
     }
-    setFirstName('');
-    setLastName('');
-    setEmail('');
-    setPosition('');
-    setAvatar(undefined);
-    onClose();
   };
 
   const handleCancel = () => {
@@ -111,6 +127,7 @@ const MentorModal: React.FC<MentorModalProps> = ({
             />
             <IconButton
               color="primary"
+              disabled={submitLoading}
               sx={{
                 position: 'absolute',
                 bottom: 0,
@@ -147,6 +164,7 @@ const MentorModal: React.FC<MentorModalProps> = ({
                 placeholder="Enter first name"
                 size="small"
                 error={!!errors.firstName}
+                disabled={submitLoading}
               />
               {errors.firstName && <FormHelperText error>{errors.firstName}</FormHelperText>}
             </Stack>
@@ -162,6 +180,7 @@ const MentorModal: React.FC<MentorModalProps> = ({
                 placeholder="Enter last name"
                 size="small"
                 error={!!errors.lastName}
+                disabled={submitLoading}
               />
               {errors.lastName && <FormHelperText error>{errors.lastName}</FormHelperText>}
             </Stack>
@@ -179,7 +198,7 @@ const MentorModal: React.FC<MentorModalProps> = ({
               placeholder="Enter mentor email"
               size="small"
               type="email"
-              disabled={mode === 'edit'}
+              disabled={mode === 'edit' || submitLoading}
               error={!!errors.email}
             />
             {errors.email && <FormHelperText error>{errors.email}</FormHelperText>}
@@ -196,6 +215,7 @@ const MentorModal: React.FC<MentorModalProps> = ({
               size="small"
               displayEmpty
               error={!!errors.position}
+              disabled={submitLoading}
             >
               <MenuItem value="" disabled>
                 {positionsLoading ? 'Loading...' : 'Select position'}
@@ -211,11 +231,23 @@ const MentorModal: React.FC<MentorModalProps> = ({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel} color="inherit">
+        <Button onClick={handleCancel} color="inherit" disabled={submitLoading}>
           Cancel
         </Button>
-        <Button onClick={handleCreate} variant="contained" color="primary">
-          {mode === 'edit' ? 'Save' : 'Create'}
+        <Button
+          onClick={handleCreate}
+          variant="contained"
+          color="primary"
+          disabled={submitLoading}
+          startIcon={submitLoading ? <CircularProgress size={20} color="inherit" /> : null}
+        >
+          {submitLoading
+            ? mode === 'edit'
+              ? 'Saving...'
+              : 'Creating...'
+            : mode === 'edit'
+              ? 'Save'
+              : 'Create'}
         </Button>
       </DialogActions>
     </Dialog>

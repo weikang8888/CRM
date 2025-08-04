@@ -29,6 +29,7 @@ const ViewProfile: React.FC = () => {
   const [avatar, setAvatar] = useState<File | string | undefined>(undefined);
   const [positions, setPositions] = useState<string[]>([]);
   const [positionsLoading, setPositionsLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
   const { data: profile, loading } = useSelector((state: RootState) => state.profile);
@@ -69,8 +70,9 @@ const ViewProfile: React.FC = () => {
   };
 
   const handleSave = async () => {
-    setIsEditing(false);
     if (!editValues) return;
+
+    setSubmitLoading(true);
     try {
       // Exclude email and role from the payload
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -91,8 +93,11 @@ const ViewProfile: React.FC = () => {
       toast.success('Profile updated successfully!');
       // Refresh profile after successful edit
       dispatch(fetchProfile());
+      setIsEditing(false);
     } catch (error) {
       toast.error('Failed to update profile.');
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -427,6 +432,8 @@ const ViewProfile: React.FC = () => {
           <Button
             variant="contained"
             fullWidth
+            disabled={submitLoading}
+            startIcon={submitLoading ? <CircularProgress size={20} color="inherit" /> : null}
             sx={{
               width: { xs: '100%', md: 'auto' },
               backgroundColor: 'primary.dark',
@@ -434,7 +441,7 @@ const ViewProfile: React.FC = () => {
             }}
             onClick={handleSave}
           >
-            Submit
+            {submitLoading ? 'Saving...' : 'Submit'}
           </Button>
         )}
       </Box>

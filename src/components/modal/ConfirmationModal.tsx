@@ -5,6 +5,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 
 interface ConfirmationModalProps {
   open: boolean;
@@ -14,6 +15,7 @@ interface ConfirmationModalProps {
   cancelText?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  loading?: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -24,6 +26,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   cancelText = 'Cancel',
   onConfirm,
   onCancel,
+  loading = false,
 }) => {
   return (
     <Dialog open={open} onClose={onCancel}>
@@ -32,15 +35,21 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <DialogContentText>{description}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onCancel} color="inherit">
+        <Button onClick={onCancel} color="inherit" disabled={loading}>
           {cancelText}
         </Button>
-        <Button onClick={onConfirm} color="error" variant="contained">
-          {confirmText}
+        <Button
+          onClick={onConfirm}
+          color="error"
+          variant="contained"
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+        >
+          {loading ? 'Deleting...' : confirmText}
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default ConfirmationModal; 
+export default ConfirmationModal;

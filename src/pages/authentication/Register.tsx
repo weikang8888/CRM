@@ -7,6 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
+import CircularProgress from '@mui/material/CircularProgress';
 import IconifyIcon from 'components/base/IconifyIcon';
 import { register, RegisterPayload } from 'api/auth/register';
 import { toast } from 'react-toastify';
@@ -24,6 +25,7 @@ const Register = () => {
     role: 'Admin',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +34,7 @@ const Register = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await register(user);
       toast.success('Registration successful!');
@@ -40,6 +43,8 @@ const Register = () => {
       const message =
         (error as { message?: string })?.message ?? 'Register failed.';
       toast.error(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,6 +62,7 @@ const Register = () => {
           variant="contained"
           color="secondary"
           fullWidth
+          disabled={loading}
           startIcon={<IconifyIcon icon="logos:google-icon" />}
           sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.main' } }}
         >
@@ -66,6 +72,7 @@ const Register = () => {
           variant="contained"
           color="secondary"
           fullWidth
+          disabled={loading}
           startIcon={<IconifyIcon icon="logos:apple" sx={{ mb: 0.5 }} />}
           sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.main' } }}
         >
@@ -88,6 +95,7 @@ const Register = () => {
           fullWidth
           autoFocus
           required
+          disabled={loading}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -107,6 +115,7 @@ const Register = () => {
           autoComplete="family-name"
           fullWidth
           required
+          disabled={loading}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -126,6 +135,7 @@ const Register = () => {
           autoComplete="email"
           fullWidth
           required
+          disabled={loading}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -145,6 +155,7 @@ const Register = () => {
           autoComplete="current-password"
           fullWidth
           required
+          disabled={loading}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -162,6 +173,7 @@ const Register = () => {
                 <IconButton
                   aria-label="toggle password visibility"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
                   sx={{ border: 'none', bgcolor: 'transparent !important' }}
                   edge="end"
                 >
@@ -181,6 +193,7 @@ const Register = () => {
             name="role"
             value={user.role}
             onChange={(e) => setUser({ ...user, role: e.target.value })}
+            disabled={loading}
             startAdornment={
               <InputAdornment position="start" sx={{ pl: 1.5 }}>
                 <IconifyIcon icon="hugeicons:user-circle-02" />
@@ -188,7 +201,6 @@ const Register = () => {
             }
             displayEmpty
             inputProps={{ 'aria-label': 'Role' }}
-            disabled={false}
           >
             <MenuItem value="Admin">Admin</MenuItem>
             <MenuItem value="Mentor">Mentor</MenuItem>
@@ -196,7 +208,15 @@ const Register = () => {
           </Select>
         </FormControl>
 
-        <Button type="submit" variant="contained" size="medium" fullWidth sx={{ mt: 1.5 }}>
+        <Button 
+          type="submit" 
+          variant="contained" 
+          size="medium" 
+          fullWidth 
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+          sx={{ mt: 1.5 }}
+        >
           Sign Up
         </Button>
       </Stack>

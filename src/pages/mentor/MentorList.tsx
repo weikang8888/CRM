@@ -10,7 +10,7 @@ import { uploadPhoto } from 'api/upload/upload';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
-import { InputAdornment, Avatar, Button } from '@mui/material';
+import { InputAdornment, Avatar, Button, CircularProgress, Box } from '@mui/material';
 import IconifyIcon from 'components/base/IconifyIcon';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import DataGridFooter from 'components/common/DataGridFooter';
@@ -34,7 +34,7 @@ const MentorList = () => {
   const [mentorToDelete, setMentorToDelete] = useState<MentorResponse | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
-
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const columns: GridColDef[] = [
     {
       field: 'avatar',
@@ -194,6 +194,7 @@ const MentorList = () => {
   const handleConfirmDelete = async () => {
     if (!mentorToDelete) return;
     try {
+      setDeleteLoading(true);
       await deleteMentor(mentorToDelete._id);
       toast.success('Mentor deleted successfully!');
       dispatch(fetchMentors());
@@ -202,6 +203,7 @@ const MentorList = () => {
     } finally {
       setConfirmOpen(false);
       setMentorToDelete(null);
+      setDeleteLoading(false);
     }
   };
 
@@ -270,9 +272,21 @@ const MentorList = () => {
         slots={{
           pagination: DataGridFooter,
           noRowsOverlay: () => <NoRowsOverlay message="No any mentor" />,
+          loadingOverlay: () => (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              height="200px"
+              width="100%"
+            >
+              <CircularProgress />
+            </Box>
+          ),
         }}
         pageSizeOptions={[5, 10, 20]}
         getRowId={(row) => row.id}
+        loading={mentorsLoading}
       />
       <MentorModal
         open={open}
@@ -301,6 +315,7 @@ const MentorList = () => {
         cancelText="Cancel"
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
+        loading={deleteLoading}
       />
     </Stack>
   );

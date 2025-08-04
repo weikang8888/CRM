@@ -57,7 +57,7 @@ const TaskList = () => {
   const [editingTask, setEditingTask] = useState<TaskForm | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
-
+  const [deleteLoading, setDeleteLoading] = useState(false);
   // Use Redux for tasks
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -161,7 +161,7 @@ const TaskList = () => {
       if (form.photo && form.photo instanceof File) {
         await uploadPhoto({
           type: 'task',
-          refId: response._id,
+          refId: response.taskId,
           photo: form.photo,
         });
       }
@@ -269,6 +269,7 @@ const TaskList = () => {
   const handleConfirmDelete = async () => {
     if (!taskToDelete) return;
     try {
+      setDeleteLoading(true);
       await deleteTask(taskToDelete._id);
       toast.success('Task deleted successfully!');
       refetchTasks();
@@ -278,6 +279,7 @@ const TaskList = () => {
     } finally {
       setConfirmOpen(false);
       setTaskToDelete(null);
+      setDeleteLoading(false);
     }
   };
 
@@ -328,9 +330,8 @@ const TaskList = () => {
   let tasksToShow = [];
   const isMentorOrMember = role === 'Mentor' || role === 'Member';
   tasksToShow = isMentorOrMember ? myTasks?.tasks || [] : allTasks?.tasks || [];
-  if (isMentorOrMember ? myLoading : allLoading) return <div>Loading...</div>;
+  const isLoading = isMentorOrMember ? myLoading : allLoading;
   const errorToShow = isMentorOrMember ? myError : allError;
-  if (errorToShow) return <div>Error: {errorToShow.message || 'Failed to load tasks'}</div>;
 
   // Use tasks from Redux
   const mappedTasks = (tasksToShow as Task[]).map((task) => {
@@ -382,13 +383,20 @@ const TaskList = () => {
           ),
         }}
       />
-      <TaskOverviewTable
-        searchText={searchText}
-        initialState={initialState}
-        rows={mappedTasks}
-        onEdit={role === 'Member' ? handleEditMemberTask : handleEditTask}
-        onRemove={handleRemoveTask}
-      />
+      {errorToShow ? (
+        <Typography color="error" textAlign="center" py={4}>
+          Error: {errorToShow.message || 'Failed to load tasks'}
+        </Typography>
+      ) : (
+        <TaskOverviewTable
+          searchText={searchText}
+          initialState={initialState}
+          rows={mappedTasks}
+          onEdit={role === 'Member' ? handleEditMemberTask : handleEditTask}
+          onRemove={handleRemoveTask}
+          loading={isLoading}
+        />
+      )}
       <ConfirmationModal
         open={confirmOpen}
         title="Delete Task"
@@ -397,6 +405,7 @@ const TaskList = () => {
         cancelText="Cancel"
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
+        loading={deleteLoading}
       />
       <TaskModal
         open={open}

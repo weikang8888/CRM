@@ -15,6 +15,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import IconButton from '@mui/material/IconButton';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import { getMentorsList, MentorResponse } from 'api/mentor/mentor';
 import { getMembersList } from 'api/member/member';
 import FormHelperText from '@mui/material/FormHelperText';
@@ -86,6 +87,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   >([]);
   const [memberLoading, setMemberLoading] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; status?: string; dueDate?: string }>({});
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   // Get role and mentorId from localStorage
   const role = localStorage.getItem('role');
@@ -201,19 +203,28 @@ const TaskModal: React.FC<TaskModalProps> = ({
     onClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors: { title?: string; status?: string; dueDate?: string } = {};
     if (!form.title.trim()) newErrors.title = 'Title is required';
     if (!form.status.trim()) newErrors.status = 'Status is required';
     if (!form.dueDate.trim()) newErrors.dueDate = 'Due date is required';
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
-    if (mode === 'edit' && onEdit) {
-      onEdit(form);
-      setErrors({});
-    } else {
-      onCreate(form);
-      setErrors({});
+
+    setSubmitLoading(true);
+    try {
+      if (mode === 'edit' && onEdit) {
+        await onEdit(form);
+        setErrors({});
+      } else {
+        await onCreate(form);
+        setErrors({});
+      }
+    } catch (error) {
+      // Error handling is done in the parent component
+      console.error('Task submission error:', error);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -489,11 +500,16 @@ const TaskModal: React.FC<TaskModalProps> = ({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel} disabled={loading}>
+        <Button onClick={handleCancel} disabled={loading || submitLoading}>
           Cancel
         </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={loading}>
-          {loading
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={loading || submitLoading}
+          startIcon={submitLoading ? <CircularProgress size={20} color="inherit" /> : null}
+        >
+          {submitLoading
             ? mode === 'edit'
               ? 'Saving...'
               : 'Creating...'

@@ -9,9 +9,9 @@ import {
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
-import { InputAdornment, Avatar, Button } from '@mui/material';
+import { InputAdornment, Avatar, Button, CircularProgress, Box } from '@mui/material';
 import IconifyIcon from 'components/base/IconifyIcon';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import DataGridFooter from 'components/common/DataGridFooter';
 import ActionMenu from 'components/sections/dashboard/task-overview/ActionMenu';
 import MemberModal from './MemberModal';
@@ -35,83 +35,7 @@ const MemberList = () => {
   const [memberToDelete, setMemberToDelete] = useState<MemberResponse | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
-
-  const columns: GridColDef[] = [
-    {
-      field: 'avatar',
-      headerName: 'Avatar',
-      flex: 1,
-      minWidth: 100,
-      sortable: false,
-      renderCell: (params) => (
-        <Stack height="100%" width="100%" alignItems="center">
-          <Avatar src={params.value} alt="avatar" sx={{ width: 40, height: 40 }} />
-        </Stack>
-      ),
-    },
-    {
-      field: 'name',
-      headerName: 'Name',
-      flex: 1,
-      minWidth: 120,
-      renderCell: (params) => (
-        <span>
-          {params.row.firstName} {params.row.lastName}
-        </span>
-      ),
-    },
-    {
-      field: 'position',
-      headerName: 'Position',
-      flex: 1,
-      minWidth: 120,
-      renderCell: (params) => (params.value ? String(params.value) : '-'),
-    },
-    {
-      field: 'email',
-      headerName: 'Email',
-      flex: 1,
-      minWidth: 140,
-      renderCell: (params) => (params.value ? String(params.value) : '-'),
-    },
-    {
-      field: 'phone',
-      headerName: 'Phone',
-      flex: 1,
-      minWidth: 120,
-      renderCell: (params) => (params.value ? String(params.value) : '-'),
-    },
-    {
-      field: 'createdAt',
-      headerName: 'Join Date',
-      flex: 1,
-      minWidth: 120,
-      renderCell: (params) => (params.value ? dayjs(String(params.value)).format('YYYY-MM-DD') : '-'),
-    },
-    {
-      field: 'task',
-      headerName: 'Tasks',
-      type: 'number',
-      flex: 1,
-      minWidth: 80,
-    },
-    {
-      field: 'action',
-      headerName: 'Action',
-      headerAlign: 'right',
-      align: 'right',
-      editable: false,
-      sortable: false,
-      flex: 1,
-      minWidth: 100,
-      renderCell: (params) => (
-        <ActionMenu
-          onEdit={() => handleEditMember(params.row)}
-          onRemove={() => handleRemoveMember(params.row)}
-        />
-      ),
-    },
-  ];
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { data: members, loading: membersLoading } = useSelector(
     (state: RootState) => state.members,
@@ -200,6 +124,7 @@ const MemberList = () => {
   const handleConfirmDelete = async () => {
     if (!memberToDelete) return;
     try {
+      setDeleteLoading(true);
       await deleteMember(memberToDelete._id);
       toast.success('Member deleted successfully!');
       dispatch(fetchMembers());
@@ -208,6 +133,7 @@ const MemberList = () => {
     } finally {
       setConfirmOpen(false);
       setMemberToDelete(null);
+      setDeleteLoading(false);
     }
   };
 
@@ -217,6 +143,86 @@ const MemberList = () => {
   };
 
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : undefined;
+  const isMentor = role === 'Mentor';
+
+  const columns: GridColDef[] = [
+    {
+      field: 'avatar',
+      headerName: 'Avatar',
+      flex: 1,
+      minWidth: 100,
+      sortable: false,
+      renderCell: (params) => (
+        <Stack height="100%" width="100%" alignItems="center">
+          <Avatar src={params.value} alt="avatar" sx={{ width: 40, height: 40 }} />
+        </Stack>
+      ),
+    },
+    {
+      field: 'name',
+      headerName: 'Name',
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => (
+        <span>
+          {params.row.firstName} {params.row.lastName}
+        </span>
+      ),
+    },
+    {
+      field: 'position',
+      headerName: 'Position',
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => (params.value ? String(params.value) : '-'),
+    },
+    {
+      field: 'email',
+      headerName: 'Email',
+      flex: 1,
+      minWidth: 140,
+      renderCell: (params) => (params.value ? String(params.value) : '-'),
+    },
+    {
+      field: 'phone',
+      headerName: 'Phone',
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => (params.value ? String(params.value) : '-'),
+    },
+    {
+      field: 'createdAt',
+      headerName: 'Join Date',
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) =>
+        params.value ? dayjs(String(params.value)).format('YYYY-MM-DD') : '-',
+    },
+    {
+      field: 'task',
+      headerName: 'Tasks',
+      type: 'number',
+      flex: 1,
+      minWidth: 80,
+    },
+    // Only show action column if user is not a Mentor
+    ...(isMentor ? [] : [{
+      field: 'action',
+      headerName: 'Action',
+      headerAlign: 'right' as const,
+      align: 'right' as const,
+      editable: false,
+      sortable: false,
+      flex: 1,
+      minWidth: 100,
+      renderCell: (params: GridRenderCellParams) => (
+        <ActionMenu
+          onEdit={() => handleEditMember(params.row)}
+          onRemove={() => handleRemoveMember(params.row)}
+        />
+      ),
+    }]),
+  ];
 
   return (
     <Stack spacing={3} width={1} direction="column" p={3.5}>
@@ -275,9 +281,21 @@ const MemberList = () => {
         slots={{
           pagination: DataGridFooter,
           noRowsOverlay: () => <NoRowsOverlay message="No any member" />,
+          loadingOverlay: () => (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              height="200px"
+              width="100%"
+            >
+              <CircularProgress />
+            </Box>
+          ),
         }}
         pageSizeOptions={[5, 10, 20]}
         getRowId={(row) => row._id || row.id}
+        loading={membersLoading}
       />
       <MemberModal
         open={open}
@@ -313,6 +331,7 @@ const MemberList = () => {
         cancelText="Cancel"
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
+        loading={deleteLoading}
       />
     </Stack>
   );

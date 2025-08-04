@@ -18,6 +18,14 @@ export default defineConfig({
   build: {
     outDir: 'build',
     chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          mui: ['@mui/material', '@mui/icons-material'],
+        },
+      },
+    },
   },
   server: {
     host: '0.0.0.0',
@@ -26,5 +34,5 @@ export default defineConfig({
   preview: {
     port: 5000,
   },
-  base: '/',
+  base: './',
 });

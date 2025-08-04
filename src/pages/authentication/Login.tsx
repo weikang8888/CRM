@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
+import CircularProgress from '@mui/material/CircularProgress';
 import IconifyIcon from 'components/base/IconifyIcon';
 import { login, LoginPayload } from 'api/auth/login';
 import { toast } from 'react-toastify';
@@ -17,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
   const [user, setUser] = useState<LoginPayload>({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -25,6 +27,7 @@ const Login = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const data = await login(user);
       localStorage.setItem('token', data.token);
@@ -38,6 +41,8 @@ const Login = () => {
       const message =
         (error as { message?: string })?.message ?? 'Login failed. Please check your credentials.';
       toast.error(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,6 +60,7 @@ const Login = () => {
           variant="contained"
           color="secondary"
           fullWidth
+          disabled={loading}
           startIcon={<IconifyIcon icon="logos:google-icon" />}
           sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.main' } }}
         >
@@ -64,6 +70,7 @@ const Login = () => {
           variant="contained"
           color="secondary"
           fullWidth
+          disabled={loading}
           startIcon={<IconifyIcon icon="logos:apple" sx={{ mb: 0.5 }} />}
           sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.main' } }}
         >
@@ -86,6 +93,7 @@ const Login = () => {
           fullWidth
           autoFocus
           required
+          disabled={loading}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -105,6 +113,7 @@ const Login = () => {
           autoComplete="current-password"
           fullWidth
           required
+          disabled={loading}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -122,6 +131,7 @@ const Login = () => {
                 <IconButton
                   aria-label="toggle password visibility"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
                   sx={{ border: 'none', bgcolor: 'transparent !important' }}
                   edge="end"
                 >
@@ -137,7 +147,15 @@ const Login = () => {
 
         <Stack mt={-2} alignItems="center" justifyContent="space-between">
           <FormControlLabel
-            control={<Checkbox id="checkbox" name="checkbox" size="small" color="primary" />}
+            control={
+              <Checkbox
+                id="checkbox"
+                name="checkbox"
+                size="small"
+                color="primary"
+                disabled={loading}
+              />
+            }
             label="Remember me"
             sx={{ ml: -1 }}
           />
@@ -146,7 +164,14 @@ const Login = () => {
           </Link>
         </Stack>
 
-        <Button type="submit" variant="contained" size="medium" fullWidth>
+        <Button
+          type="submit"
+          variant="contained"
+          size="medium"
+          fullWidth
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+        >
           Login
         </Button>
       </Stack>

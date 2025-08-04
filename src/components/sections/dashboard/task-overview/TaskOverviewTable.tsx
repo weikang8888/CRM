@@ -5,6 +5,8 @@ import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 import { DataGrid, GridColDef, useGridApiRef, GridApi } from '@mui/x-data-grid';
 import DataGridFooter from 'components/common/DataGridFooter';
 import ActionMenu from './ActionMenu';
@@ -31,6 +33,7 @@ interface TaskOverviewTableProps {
   rows: TaskRow[];
   onEdit?: (row: TaskRow) => void;
   onRemove?: (row: TaskRow) => void;
+  loading?: boolean;
 }
 
 const TaskOverviewTable = ({
@@ -40,6 +43,7 @@ const TaskOverviewTable = ({
   rows,
   onEdit,
   onRemove,
+  loading = false,
 }: TaskOverviewTableProps) => {
   const apiRef = useGridApiRef<GridApi>();
 
@@ -188,10 +192,22 @@ const TaskOverviewTable = ({
       slots={{
         pagination: DataGridFooter,
         noRowsOverlay: () => <NoRowsOverlay message="No any task" />,
+        loadingOverlay: () => (
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            height="200px"
+            width="100%"
+          >
+            <CircularProgress />
+          </Box>
+        ),
       }}
       checkboxSelection
       pageSizeOptions={[5, 10, 20]}
       getRowId={(row) => row._id}
+      loading={loading}
     />
   );
 };

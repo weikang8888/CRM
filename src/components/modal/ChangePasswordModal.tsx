@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { toast } from 'react-toastify';
@@ -69,6 +70,8 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       try {
         await changePassword({ oldPassword, newPassword });
         toast.success('Password changed successfully!');
+        // Set needsPasswordChange to false after successful password change
+        localStorage.setItem('needsPasswordChange', 'false');
         onSuccess?.();
         onClose();
         // Reset form
@@ -125,10 +128,15 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               required
               error={!!errors.oldPassword}
               helperText={errors.oldPassword}
+              disabled={internalLoading}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">
+                    <IconButton
+                      onClick={() => setShowOldPassword(!showOldPassword)}
+                      edge="end"
+                      disabled={internalLoading}
+                    >
                       {showOldPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
@@ -152,10 +160,15 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               required
               error={!!errors.newPassword}
               helperText={errors.newPassword}
+              disabled={internalLoading}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                    <IconButton
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      edge="end"
+                      disabled={internalLoading}
+                    >
                       {showNewPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
@@ -179,12 +192,14 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               required
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword}
+              disabled={internalLoading}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       edge="end"
+                      disabled={internalLoading}
                     >
                       {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
@@ -201,7 +216,12 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             Cancel
           </Button>
         )}
-        <Button variant="contained" onClick={handleSubmit} disabled={internalLoading}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={internalLoading}
+          startIcon={internalLoading ? <CircularProgress size={20} color="inherit" /> : null}
+        >
           {internalLoading ? 'Changing Password...' : 'Change Password'}
         </Button>
       </DialogActions>

@@ -28,24 +28,24 @@ const menuItems: MenuItems[] = [
     icon: 'hugeicons:user-circle-02',
     path: '/profile',
   },
-  {
-    id: 2,
-    title: 'Account Settings',
-    icon: 'hugeicons:account-setting-02',
-    path: '#',
-  },
+  // {
+  //   id: 2,
+  //   title: 'Account Settings',
+  //   icon: 'hugeicons:account-setting-02',
+  //   path: '#',
+  // },
   {
     id: 3,
     title: 'Notifications',
     icon: 'solar:bell-outline',
     path: '#',
   },
-  {
-    id: 4,
-    title: 'Switch Account',
-    icon: 'hugeicons:user-switch',
-    path: '#',
-  },
+  // {
+  //   id: 4,
+  //   title: 'Switch Account',
+  //   icon: 'hugeicons:user-switch',
+  //   path: '#',
+  // },
   {
     id: 5,
     title: 'Help Center',
