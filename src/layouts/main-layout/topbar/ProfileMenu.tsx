@@ -83,7 +83,8 @@ const ProfileMenu = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-
+    localStorage.removeItem('_id');
+    localStorage.removeItem('needsPasswordChange');
     handleProfileMenuClose();
     window.location.href = '/login';
   };
