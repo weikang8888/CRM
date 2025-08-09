@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -15,7 +15,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { MentorPayload } from '../../api/mentor/mentor';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { getPositions } from 'api/profile/profile';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchPositions } from 'store/profileSlice';
+import { RootState, AppDispatch } from 'store';
 import FormHelperText from '@mui/material/FormHelperText';
 
 interface MentorModalProps {
@@ -38,8 +40,8 @@ const MentorModal: React.FC<MentorModalProps> = ({
   const [email, setEmail] = useState(initialValues?.email || '');
   const [position, setPosition] = useState(initialValues?.position || '');
   const [avatar, setAvatar] = useState<File | string | undefined>(initialValues?.avatar);
-  const [positions, setPositions] = useState<string[]>([]);
-  const [positionsLoading, setPositionsLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { positions, positionsLoading } = useSelector((state: RootState) => state.profile);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [errors, setErrors] = useState<{
     firstName?: string;
@@ -48,7 +50,7 @@ const MentorModal: React.FC<MentorModalProps> = ({
     position?: string;
   }>({});
 
-  React.useEffect(() => {
+  useEffect(() => {
     setFirstName(initialValues?.firstName || '');
     setLastName(initialValues?.lastName || '');
     setEmail(initialValues?.email || '');
@@ -56,12 +58,11 @@ const MentorModal: React.FC<MentorModalProps> = ({
     setAvatar(initialValues?.avatar);
   }, [initialValues, open]);
 
-  React.useEffect(() => {
-    setPositionsLoading(true);
-    getPositions()
-      .then((data) => setPositions(data))
-      .finally(() => setPositionsLoading(false));
-  }, []);
+  useEffect(() => {
+    if (!positions.length && !positionsLoading) {
+      dispatch(fetchPositions());
+    }
+  }, [positions, positionsLoading, dispatch]);
 
   const handleCreate = async () => {
     const newErrors: { firstName?: string; lastName?: string; email?: string; position?: string } =

@@ -13,7 +13,6 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import IconifyIcon from 'components/base/IconifyIcon';
-import { Thumb5 } from 'data/images';
 import { RootState } from 'store';
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
@@ -81,7 +80,11 @@ const TaskToday = () => {
         }
         title="Task Today"
       />
-      <CardMedia component="img" height={160} image={Thumb5} alt="task_today_image" />
+      {closestTask?.photo ? (
+        <CardMedia component="img" height={160} image={closestTask?.photo} alt="task_today_image" />
+      ) : (
+        <Box height={160} bgcolor="#f5f5f5" borderRadius={2} />
+      )}
       <CardContent>
         <Box mt={2}>
           <Typography variant="subtitle1" color="text.primary" fontWeight={600}>

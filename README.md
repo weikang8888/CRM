@@ -1,118 +1,108 @@
 # CRM - Task Management System
 
-A comprehensive Customer Relationship Management (CRM) system built with React, TypeScript, and Material-UI for efficient task management and team collaboration.
+A comprehensive task management system built with modern web technologies to streamline project workflows and team collaboration.
 
-## 🎯 Project Overview
+## 🚀 Overview
 
-This CRM system is designed for task assignment and management with three distinct user roles, each with specific permissions and capabilities.
-
-## 👥 User Roles & Permissions
-
-### 🔧 Admin
-
-- **Full Task Management**: Create, edit, and delete tasks
-- **Mentor Management**: Create, edit, and delete mentors
-- **Complete System Access**: Full administrative privileges
-- **Dashboard Analytics**: Access to comprehensive system overview
-
-### 👨‍🏫 Mentor
-
-- **Task Assignment**: Can be assigned to tasks by admin
-- **Task Management**: View and manage assigned tasks
-- **Member Supervision**: Oversee member progress on tasks
-- **Limited Administrative Access**: Cannot create/delete mentors
-
-### 👤 Member
-
-- **Task Status Updates**: Can only update the status of assigned tasks
-- **Task Viewing**: View assigned tasks and progress
-- **Profile Management**: Update personal profile information
-- **Restricted Access**: Cannot create, edit, or delete tasks
-
-## 🚀 Key Features
-
-### Task Management
-
-- **Create Tasks**: Admins can create new tasks with detailed information
-- **Edit Tasks**: Modify task details, assignments, and deadlines
-- **Delete Tasks**: Remove tasks from the system
-- **Status Updates**: Members can update task progress status
-- **Task Assignment**: Assign tasks to specific mentors and members
-- **Due Date Tracking**: Monitor task deadlines and progress
-
-### User Management
-
-- **Mentor Management**: Admins can create and manage mentor accounts
-- **Member Management**: Handle member accounts and assignments
-- **Role-based Access**: Secure access control based on user roles
-- **Profile Management**: Users can update their personal information
-
-### Dashboard & Analytics
-
-- **Activity Overview**: Track system activity and task progress
-- **Monthly Mentors**: View mentor performance and assignments
-- **Running Tasks**: Monitor currently active tasks
-- **Task Overview**: Comprehensive task management interface
-- **Week Calendar**: Schedule and deadline visualization
+This CRM (Customer Relationship Management) system is designed as a task management platform that enables teams to organize, track, and manage tasks efficiently. The system supports role-based access control with different permissions for administrators, mentors, and members.
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React 18 with TypeScript
-- **UI Framework**: Material-UI (MUI)
+- **Frontend Framework**: React 18 with TypeScript
+- **UI Library**: Material-UI (MUI) v5
 - **State Management**: Redux Toolkit
-- **Routing**: React Router v6
+- **Routing**: React Router DOM
 - **Build Tool**: Vite
-- **HTTP Client**: Axios
-- **Charts**: ECharts
-- **Notifications**: React Toastify
+- **Styling**: CSS-in-JS with MUI's sx prop and custom themes
 
-## 📁 Project Structure
+## 👥 User Roles & Permissions
 
-```
-src/
-├── api/           # API integration layer
-├── components/    # Reusable UI components
-├── layouts/       # Layout components
-├── pages/         # Main application pages
-├── routes/        # Routing configuration
-├── store/         # Redux store and slices
-├── theme/         # Material-UI theme customization
-└── assets/        # Static assets and images
-```
+### 🔑 Admin
+- **Task Management**: Create, edit, and delete all tasks
+- **User Management**: Create, edit, and delete mentors
+- **Notifications**: Mark notifications as read, view all notifications
+- **Full Access**: Complete system administration capabilities
 
-## 🔐 Authentication & Security
+### 👨‍🏫 Mentor
+- **Task Management**: Create, edit, and delete tasks they created
+- **Task Assignment**: Assign tasks to members
+- **Collaboration**: Work with team members on assigned projects
+- **Notifications**: Receive and manage task-related notifications
 
-- **JWT Token-based Authentication**
-- **Role-based Access Control (RBAC)**
-- **Secure API Communication**
-- **Password Change Requirements**
-- **Session Management**
+### 👤 Member
+- **Task Updates**: Update status of assigned tasks
+- **Progress Tracking**: Monitor and update task progress
+- **Notifications**: Receive notifications for assigned tasks
+- **Limited Access**: View and update only assigned tasks
+
+## ✨ Key Features
+
+### 📋 Task Management
+- Create and organize tasks with detailed information
+- Set due dates, priority levels, and progress tracking
+- Assign tasks to team members and mentors
+- Real-time status updates and progress monitoring
+
+### 🔔 Notification System
+- Real-time notifications for task assignments and updates
+- Role-based notification filtering
+- Mark notifications as read/unread
+- Notification history and management
+
+### 👥 User Management
+- Role-based access control
+- User profile management
+- Team member directory
+- Mentor and member relationship management
+
+### 📊 Dashboard & Analytics
+- Task overview and statistics
+- Progress tracking and reporting
+- Activity monitoring
+- Calendar view for task scheduling
 
 ## 🎨 UI/UX Features
 
-- **Responsive Design**: Works on desktop, tablet, and mobile
-- **Modern Material Design**: Clean and intuitive interface
-- **Dark/Light Theme Support**: Customizable appearance
-- **Interactive Components**: Rich user interactions
-- **Real-time Updates**: Live data synchronization
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Dark/Light Theme**: Customizable theme preferences
+- **Material Design**: Clean, modern interface following Material Design principles
+- **Data Tables**: Advanced data grids with sorting, filtering, and pagination
+- **Form Validation**: Comprehensive input validation and error handling
 
-## 🚀 Getting Started
+## 🏗️ System Architecture
+
+### Frontend Structure
+```
+src/
+├── components/          # Reusable UI components
+├── pages/              # Application pages
+├── layouts/            # Layout components
+├── store/              # Redux store and slices
+├── api/                # API integration layer
+├── routes/             # Routing configuration
+└── theme/              # Material-UI theme customization
+```
+
+### Key Components
+- **Task Management**: TaskList, TaskModal, TaskOverview
+- **User Management**: MemberList, MentorList, UserProfile
+- **Notifications**: NotificationButton, NotificationList
+- **Dashboard**: Activity charts, progress tracking, calendar views
+
+## 🔧 Installation & Setup
 
 1. **Clone the repository**
-
    ```bash
-   git clone https://github.com/weikang8888/CRM.git
-   cd CRM
+   git clone [repository-url]
+   cd crm
    ```
 
 2. **Install dependencies**
-
    ```bash
    npm install
    ```
 
 3. **Start development server**
-
    ```bash
    npm run dev
    ```
@@ -122,31 +112,39 @@ src/
    npm run build
    ```
 
-## 📋 API Endpoints
+## 🌟 Getting Started
 
-The system integrates with backend APIs for:
+1. **Login**: Access the system with your assigned role credentials
+2. **Dashboard**: View your personalized dashboard with relevant tasks and notifications
+3. **Task Management**: Create, assign, or update tasks based on your role permissions
+4. **Notifications**: Stay updated with real-time notifications
+5. **Profile**: Manage your user profile and preferences
 
-- **Authentication**: Login, register, password change
-- **Task Management**: CRUD operations for tasks
-- **User Management**: Mentor and member operations
-- **File Upload**: Profile pictures and task attachments
-- **Profile Management**: User profile updates
+## 📱 Responsive Design
 
-## 🔄 Recent Updates
+The system is fully responsive and optimized for:
+- **Desktop**: Full-featured interface with advanced data tables and charts
+- **Tablet**: Touch-optimized interface with collapsible sidebars
+- **Mobile**: Streamlined interface with essential features accessible on-the-go
 
-- **Password Change Modal**: Automatic password change requirement
-- **Role-based Task Permissions**: Enhanced access control
-- **TypeScript Integration**: Improved type safety
-- **Error Handling**: Comprehensive error management
-- **Performance Optimization**: Enhanced loading and caching
+## 🔒 Security Features
+
+- Role-based access control (RBAC)
+- Secure authentication and session management
+- Input validation and sanitization
+- Protected API endpoints based on user roles
 
 ## 🤝 Contributing
 
-This project is designed for internal use with specific role-based workflows. For any modifications or enhancements, please ensure compatibility with the existing role structure and permission system.
+This project follows modern React and TypeScript best practices. When contributing:
+- Use TypeScript for type safety
+- Follow Material-UI design patterns
+- Implement responsive design principles
+- Maintain role-based access control
 
 ## 📄 License
 
-This project is proprietary and designed for internal organizational use.
+[Add your license information here]
 
 ---
 

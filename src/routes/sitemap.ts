@@ -32,6 +32,12 @@ const rawSitemap: MenuItem[] = [
     icon: 'hugeicons:book-open-01',
   },
   {
+    id: 'notifications',
+    subheader: 'Notifications',
+    path: '/notifications',
+    icon: 'mynaui:bell',
+  },
+  {
     id: 'mentors',
     subheader: 'Mentors',
     path: '/mentors-list',

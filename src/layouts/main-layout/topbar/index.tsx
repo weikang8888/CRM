@@ -1,6 +1,5 @@
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
-import Badge from '@mui/material/Badge';
 import Toolbar from '@mui/material/Toolbar';
 import TextField from '@mui/material/TextField';
 import ButtonBase from '@mui/material/ButtonBase';
@@ -11,6 +10,8 @@ import Image from 'components/base/Image';
 import LogoImg from 'assets/images/Logo.png';
 import LanguageSelect from './LanguageSelect';
 import ProfileMenu from './ProfileMenu';
+import NotificationButton from './NotificationButton';
+import { useEffect, useState } from 'react';
 
 interface TopbarProps {
   isClosing: boolean;
@@ -19,6 +20,13 @@ interface TopbarProps {
 }
 
 const Topbar = ({ isClosing, mobileOpen, setMobileOpen }: TopbarProps) => {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    setIsAdmin(role === 'Admin');
+  }, []);
+
   const handleDrawerToggle = () => {
     if (!isClosing) {
       setMobileOpen(!mobileOpen);
@@ -80,11 +88,7 @@ const Topbar = ({ isClosing, mobileOpen, setMobileOpen }: TopbarProps) => {
 
       <Stack spacing={{ xs: 1, sm: 2 }} alignItems="center">
         <LanguageSelect />
-        <IconButton size="large">
-          <Badge color="error" variant="dot">
-            <IconifyIcon icon="solar:bell-outline" />
-          </Badge>
-        </IconButton>
+        {!isAdmin && <NotificationButton />}
         <ProfileMenu />
       </Stack>
     </Stack>

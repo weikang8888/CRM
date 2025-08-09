@@ -8,6 +8,7 @@ import PageLoader from 'components/loader/PageLoader';
 import TaskList from 'pages/task/TaskList';
 import MentorList from 'pages/mentor/MentorList';
 import MemberList from 'pages/member/MemberList';
+import NotificationList from 'pages/notification/NotificationList';
 
 const App = lazy(() => import('App'));
 const Dashboard = lazy(() => import('pages/dashboard'));
@@ -50,6 +51,10 @@ const router = createBrowserRouter(
               element: <TaskList />,
             },
             {
+              path: '/notifications',
+              element: <NotificationList />,
+            },
+            {
               path: '/mentors-list',
               element: <MentorList />,
             },
@@ -71,7 +76,15 @@ const router = createBrowserRouter(
               element: <Login />,
             },
             {
+              path: '/auth/callback',
+              element: <Login />,
+            },
+            {
               path: '/register',
+              element: <Register />,
+            },
+            {
+              path: '/auth/register/callback',
               element: <Register />,
             },
           ],

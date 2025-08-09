@@ -48,6 +48,11 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onRemove }) => {
     handleActionMenuClose();
   };
 
+  const role = localStorage.getItem('role');
+  const filteredActions = actions.filter(
+    (action) => !(role === 'Member' && action.title === 'Remove'),
+  );
+
   return (
     <Box pr={1.5}>
       <IconButton
@@ -72,7 +77,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onRemove }) => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        {actions.map((actionItem) => {
+        {filteredActions.map((actionItem) => {
           let onClickHandler = handleActionItemClick;
           if (actionItem.title === 'Edit' && onEdit) {
             onClickHandler = () => {

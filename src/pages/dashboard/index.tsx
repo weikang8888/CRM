@@ -31,6 +31,11 @@ const Dashboard = () => {
   );
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    // Only fetch data if token exists
+    if (!token) return;
+
     if (!allTasks && !tasksLoading) dispatch(fetchAllTasks());
     if (!mentors && !mentorsLoading) dispatch(fetchMentors());
     if (!members && !membersLoading) dispatch(fetchMembers());

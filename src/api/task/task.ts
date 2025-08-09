@@ -9,6 +9,7 @@ export interface TaskPayload {
   dueDate: string;
   memberId?: string[];
   mentorId?: string;
+  createdBy?: string;
 }
 
 export const createTask = async (data: TaskPayload) => {
@@ -25,6 +26,9 @@ export const createTask = async (data: TaskPayload) => {
     if (data.mentorId) {
       payload.mentorId = data.mentorId;
     }
+    if (data.createdBy) {
+      payload.createdBy = data.createdBy;
+    }
     const res = await API.post('/task/create', payload);
     return res.data;
   } catch (error: unknown) {
@@ -40,10 +44,12 @@ export const editTask = async (data: TaskPayload) => {
       status: data.status,
       dueDate: data.dueDate,
     };
-    if (data.memberId && data.memberId.length > 0) {
+    // Always include memberId, even if it's an empty array
+    if (data.memberId !== undefined) {
       payload.memberId = data.memberId;
     }
-    if (data.mentorId) {
+    // Always include mentorId, even if it's empty string
+    if (data.mentorId !== undefined) {
       payload.mentorId = data.mentorId;
     }
     const res = await API.put(`/task/edit/${data._id}`, payload);
@@ -102,7 +108,7 @@ export const updateTaskStatusProgress = async (params: {
 };
 
 // Fetch tasks for a specific member
-export const memberTask = async (params: { memberId: string }) => {
+export const memberTask = async (params: { memberId: string; taskId?: string }) => {
   try {
     const res = await API.post('/task/memberTask', params);
     return res.data;

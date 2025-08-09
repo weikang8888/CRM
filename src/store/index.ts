@@ -3,6 +3,7 @@ import profileReducer from './profileSlice';
 import taskReducer from './taskSlice';
 import mentorReducer from './mentorSlice';
 import memberReducer from './memberSlice';
+import notificationReducer from './notificationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     tasks: taskReducer,
     mentors: mentorReducer,
     members: memberReducer,
+    notifications: notificationReducer,
   },
 });
 

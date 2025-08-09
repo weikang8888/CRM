@@ -38,7 +38,7 @@ const menuItems: MenuItems[] = [
     id: 3,
     title: 'Notifications',
     icon: 'solar:bell-outline',
-    path: '#',
+    path: '/notifications',
   },
   // {
   //   id: 4,

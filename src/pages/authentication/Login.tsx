@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -12,14 +12,34 @@ import Checkbox from '@mui/material/Checkbox';
 import CircularProgress from '@mui/material/CircularProgress';
 import IconifyIcon from 'components/base/IconifyIcon';
 import { login, LoginPayload } from 'api/auth/login';
+import { initiateGoogleLogin, handleGoogleCallback } from 'api/auth/google';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Login = () => {
   const [user, setUser] = useState<LoginPayload>({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Handle Google OAuth callback
+  useEffect(() => {
+    try {
+      const authData = handleGoogleCallback(searchParams);
+      localStorage.setItem('token', authData.token);
+      localStorage.setItem('role', authData.role);
+      localStorage.setItem('_id', authData._id);
+      toast.success('Google login successful!');
+      navigate('/dashboard');
+    } catch (error) {
+      // No callback parameters, normal login page
+      if (searchParams.has('token') || searchParams.has('error')) {
+        const errorMessage = (error as Error).message;
+        toast.error(`Google login failed: ${errorMessage}`);
+      }
+    }
+  }, [searchParams, navigate]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -61,10 +81,11 @@ const Login = () => {
           color="secondary"
           fullWidth
           disabled={loading}
+          onClick={initiateGoogleLogin}
           startIcon={<IconifyIcon icon="logos:google-icon" />}
           sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.main' } }}
         >
-          Google
+          Google(Member)
         </Button>
         <Button
           variant="contained"

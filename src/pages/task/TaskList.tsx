@@ -27,32 +27,27 @@ type Task = {
   memberId?: (string | number | { id: string | number; avatar?: string })[];
   mentorId?: string;
 };
-import { getMembersList } from 'api/member/member';
+
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ConfirmationModal from 'components/modal/ConfirmationModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from 'store';
 import { fetchAllTasks, fetchMyTasks } from 'store/taskSlice';
+import { fetchMembers } from 'store/memberSlice';
+import { fetchMentors } from 'store/mentorSlice';
 import { uploadPhoto } from 'api/upload/upload';
+import { fetchNotificationList } from 'store/notificationSlice';
 
 const TaskList = () => {
   const [searchText, setSearchText] = useState('');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [members, setMembers] = useState<
-    Array<{
-      _id: string;
-      firstName: string;
-      lastName: string;
-      position: string;
-      avatar?: string;
-      email: string;
-      phone: string;
-      joinDate: string;
-    }>
-  >([]);
+  // Use Redux for members
+  const { data: members, loading: membersLoading } = useSelector(
+    (state: RootState) => state.members,
+  );
   const [editMode, setEditMode] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskForm | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -86,8 +81,13 @@ const TaskList = () => {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
     const id = localStorage.getItem('_id');
+
+    // Only fetch if token exists
+    if (!token) return;
+
     if (role === 'Mentor' && id) {
       if (!myTasks && !myLoading) dispatch(fetchMyTasks({ mentorId: id }));
     } else if (role === 'Member' && id) {
@@ -98,44 +98,10 @@ const TaskList = () => {
   }, [dispatch, allTasks, allLoading, myTasks, myLoading]);
 
   useEffect(() => {
-    fetchMembers();
-  }, []);
-
-  const fetchMembers = async () => {
-    try {
-      const data = await getMembersList();
-      if (Array.isArray(data)) {
-        setMembers(data);
-      } else if (
-        data &&
-        typeof data === 'object' &&
-        'members' in data &&
-        Array.isArray((data as { members: unknown[] }).members)
-      ) {
-        setMembers(
-          (
-            data as {
-              members: Array<{
-                _id: string;
-                firstName: string;
-                lastName: string;
-                position: string;
-                avatar?: string;
-                email: string;
-                phone: string;
-                joinDate: string;
-              }>;
-            }
-          ).members,
-        );
-      } else {
-        setMembers([]);
-      }
-    } catch (error) {
-      console.error('Failed to fetch members:', error);
-      setMembers([]);
+    if (!members && !membersLoading) {
+      dispatch(fetchMembers());
     }
-  };
+  }, [dispatch, members, membersLoading]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
@@ -154,9 +120,22 @@ const TaskList = () => {
         dueDate: form.dueDate,
         memberId: form.memberId,
         mentorId: form.mentorId,
+        createdBy: localStorage.getItem('_id') || '',
       };
 
       const response = await createTask(payload);
+
+      // Check if payload has memberId and call fetchMembers
+      if (payload.memberId && payload.memberId.length > 0) {
+        dispatch(fetchMembers());
+        dispatch(fetchNotificationList({}));
+      }
+
+      // Check if payload has mentorId and call fetchMentors
+      if (payload.mentorId) {
+        dispatch(fetchMentors());
+        dispatch(fetchNotificationList({}));
+      }
 
       if (form.photo && form.photo instanceof File) {
         await uploadPhoto({
@@ -210,7 +189,26 @@ const TaskList = () => {
     setLoading(true);
     setError(null);
     try {
-      await editTask(form);
+      // Prepare the payload with memberId: [] if no members are selected
+      const payload: TaskPayload = {
+        ...form,
+        memberId: form.memberId && form.memberId.length > 0 ? form.memberId : [],
+        mentorId: form.mentorId || undefined,
+      };
+
+      await editTask(payload);
+
+      // Check if payload has memberId and call fetchMembers
+      if (payload.memberId && payload.memberId.length > 0) {
+        dispatch(fetchMembers());
+        dispatch(fetchNotificationList({}));
+      }
+
+      // Check if payload has mentorId and call fetchMentors
+      if (payload.mentorId) {
+        dispatch(fetchMentors());
+        dispatch(fetchNotificationList({}));
+      }
 
       if (form.photo && form.photo instanceof File) {
         await uploadPhoto({
@@ -288,28 +286,30 @@ const TaskList = () => {
     setTaskToDelete(null);
   };
 
-  const handleEditMemberTask = async () => {
+  const handleEditMemberTask = async (taskId: string | undefined) => {
     setLoading(true);
     setError(null);
     try {
       const memberId = localStorage.getItem('_id') || '';
-      const data = await memberTask({ memberId });
+      const data = await memberTask({ memberId, taskId });
+
       if (Array.isArray(data) && data.length > 0) {
-        const t = data[0];
+        const t = data[0]; // Now safe to use [0] since we're getting specific task
+        console.log(t);
         setEditingTask({
           _id: t.taskId,
           title: t.title,
           dueDate: t.dueDate,
           status: t.memberStatus || t.status,
           progress: t.memberProgress || 0,
-          photo: '',
-          memberId: [memberId],
-          mentorId: '',
+          photo: t.photo,
+          memberId: Array.isArray(t.memberId) ? t.memberId : t.memberId ? [t.memberId] : [],
+          mentorId: t.mentorId || '',
         });
         setEditMode(true);
         setOpen(true);
       } else {
-        toast.error('No tasks found for this member.');
+        toast.error('Task not found.');
       }
       setLoading(false);
     } catch (error: unknown) {
@@ -338,7 +338,7 @@ const TaskList = () => {
     const memberAvatars = (task.memberId || []).map((id) => {
       // Handle different types of memberId
       const memberId = typeof id === 'object' && id !== null && 'id' in id ? id.id : id;
-      const member = members.find((m) => m._id === String(memberId));
+      const member = members?.find((m) => m._id === String(memberId));
       return { id: memberId, avatar: member?.avatar || '' };
     });
     return {
@@ -392,7 +392,7 @@ const TaskList = () => {
           searchText={searchText}
           initialState={initialState}
           rows={mappedTasks}
-          onEdit={role === 'Member' ? handleEditMemberTask : handleEditTask}
+          onEdit={role === 'Member' ? (row) => handleEditMemberTask(row._id) : handleEditTask}
           onRemove={handleRemoveTask}
           loading={isLoading}
         />

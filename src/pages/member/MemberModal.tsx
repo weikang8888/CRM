@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -16,7 +16,9 @@ import { MemberPayload } from '../../api/member/member';
 import FormHelperText from '@mui/material/FormHelperText';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { getPositions } from 'api/profile/profile';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchPositions } from 'store/profileSlice';
+import { RootState, AppDispatch } from 'store';
 
 interface MemberModalProps {
   open: boolean;
@@ -44,9 +46,15 @@ const MemberModal: React.FC<MemberModalProps> = ({
     email?: string;
     position?: string;
   }>({});
-  const [positions, setPositions] = useState<string[]>([]);
-  const [positionsLoading, setPositionsLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { positions, positionsLoading } = useSelector((state: RootState) => state.profile);
+
+  useEffect(() => {
+    if (!positions.length && !positionsLoading) {
+      dispatch(fetchPositions());
+    }
+  }, [positions, positionsLoading, dispatch]);
 
   React.useEffect(() => {
     setFirstName(initialValues?.firstName || '');
@@ -55,13 +63,6 @@ const MemberModal: React.FC<MemberModalProps> = ({
     setPosition(initialValues?.position || '');
     setAvatar(initialValues?.avatar);
   }, [initialValues, open]);
-
-  React.useEffect(() => {
-    setPositionsLoading(true);
-    getPositions()
-      .then((data) => setPositions(data))
-      .finally(() => setPositionsLoading(false));
-  }, []);
 
   const handleCreate = async () => {
     const newErrors: { firstName?: string; lastName?: string; email?: string; position?: string } =

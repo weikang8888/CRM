@@ -16,8 +16,10 @@ import IconButton from '@mui/material/IconButton';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
-import { getMentorsList, MentorResponse } from 'api/mentor/mentor';
-import { getMembersList } from 'api/member/member';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchMentors } from 'store/mentorSlice';
+import { fetchMembers } from 'store/memberSlice';
+import { RootState, AppDispatch } from 'store';
 import FormHelperText from '@mui/material/FormHelperText';
 
 const statusOptions = ['pending', 'in progress', 'completed'];
@@ -64,30 +66,17 @@ const TaskModal: React.FC<TaskModalProps> = ({
   loading = false,
 }) => {
   const [form, setForm] = useState<TaskForm>(initialFormState);
-  const [mentorOptions, setMentorOptions] = useState<
-    Array<{
-      lastName: string;
-      firstName: string;
-      id: string;
-      name: string;
-      title: string;
-      avatar?: string;
-    }>
-  >([]);
-  const [mentorLoading, setMentorLoading] = useState(false);
-  const [memberOptions, setMemberOptions] = useState<
-    Array<{
-      lastName: string;
-      firstName: string;
-      id: string;
-      name: string;
-      position: string;
-      avatar?: string;
-    }>
-  >([]);
-  const [memberLoading, setMemberLoading] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; status?: string; dueDate?: string }>({});
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  // Redux for mentors and members
+  const dispatch = useDispatch<AppDispatch>();
+  const { data: mentors, loading: mentorsLoading } = useSelector(
+    (state: RootState) => state.mentors,
+  );
+  const { data: members, loading: membersLoading } = useSelector(
+    (state: RootState) => state.members,
+  );
 
   // Get role and mentorId from localStorage
   const role = localStorage.getItem('role');
@@ -105,73 +94,56 @@ const TaskModal: React.FC<TaskModalProps> = ({
         }
       }
       setErrors({});
-      setMentorLoading(true);
-      getMentorsList()
-        .then((data) => {
-          if (
-            data &&
-            typeof data === 'object' &&
-            'mentors' in data &&
-            Array.isArray((data as { mentors: unknown[] }).mentors)
-          ) {
-            let mentors = (data as { mentors: MentorResponse[] }).mentors.map((mentor) => ({
-              id: mentor._id,
-              firstName: mentor.firstName,
-              lastName: mentor.lastName,
-              name: `${mentor.firstName} ${mentor.lastName}`,
-              title: mentor.position,
-              avatar: mentor.avatar,
-            }));
-            // If Mentor, only show self
-            if (role === 'Mentor' && currentMentorId) {
-              mentors = mentors.filter((mentor: { id: string }) => mentor.id === currentMentorId);
-            }
-            setMentorOptions(mentors);
-          } else {
-            setMentorOptions([]);
-          }
-          setMentorLoading(false);
-        })
-        .catch(() => {
-          setMentorLoading(false);
-        });
-      setMemberLoading(true);
-      getMembersList()
-        .then((data) => {
-          if (
-            data &&
-            typeof data === 'object' &&
-            'members' in data &&
-            Array.isArray((data as { members: unknown[] }).members)
-          ) {
-            setMemberOptions(
-              (
-                data as {
-                  members: Array<{
-                    _id: string;
-                    firstName: string;
-                    lastName: string;
-                    position: string;
-                    avatar?: string;
-                  }>;
-                }
-              ).members.map((member) => ({
-                id: member._id,
-                firstName: member.firstName,
-                lastName: member.lastName,
-                name: `${member.firstName} ${member.lastName}`,
-                position: member.position,
-                avatar: member.avatar,
-              })),
-            );
-          } else {
-            setMemberOptions([]);
-          }
-          setMemberLoading(false);
-        })
-        .catch(() => setMemberLoading(false));
+
+      if (!mentors && !mentorsLoading) {
+        dispatch(fetchMentors());
+      }
+
+      if (!members && !membersLoading) {
+        dispatch(fetchMembers());
+      }
     }
-  }, [open, role, currentMentorId]);
+  }, [
+    open,
+    role,
+    currentMentorId,
+    mode,
+    initialValues,
+    mentors,
+    mentorsLoading,
+    members,
+    membersLoading,
+    dispatch,
+  ]);
+
+  // Prepare mentorOptions and memberOptions for Selects
+  const mentorOptions = Array.isArray(mentors)
+    ? (role === 'Mentor' && currentMentorId
+        ? mentors.filter((mentor) => mentor._id === currentMentorId)
+        : mentors
+      ).map((mentor) => ({
+        id: mentor._id,
+        firstName: mentor.firstName,
+        lastName: mentor.lastName,
+        name: `${mentor.firstName} ${mentor.lastName}`,
+        title: mentor.position,
+        avatar: mentor.avatar,
+      }))
+    : [];
+
+  const memberOptions = Array.isArray(members)
+    ? members.map((member) => ({
+        id: member._id,
+        firstName: member.firstName,
+        lastName: member.lastName,
+        name: `${member.firstName} ${member.lastName}`,
+        position: member.position,
+        avatar: member.avatar,
+      }))
+    : [];
+
+  const mentorLoading = mentorsLoading;
+  const memberLoading = membersLoading;
 
   // Separate useEffect to handle initialValues changes
   useEffect(() => {
@@ -354,6 +326,9 @@ const TaskModal: React.FC<TaskModalProps> = ({
                 error={!!errors.dueDate}
                 helperText={errors.dueDate}
                 disabled={mode === 'edit' && role === 'Member'}
+                inputProps={{
+                  min: new Date().toISOString().split('T')[0],
+                }}
               />
             </Stack>
           </Stack>
@@ -454,6 +429,9 @@ const TaskModal: React.FC<TaskModalProps> = ({
                   onChange={handleSelectChange('mentorId')}
                   input={<OutlinedInput />}
                   renderValue={(selected) => {
+                    if (!selected) {
+                      return <Typography color="text.secondary">Select mentor</Typography>;
+                    }
                     const mentor = mentorOptions.find((u) => u.id === selected);
                     return mentor ? (
                       <Stack direction="row" alignItems="center" spacing={0.5}>
@@ -482,16 +460,21 @@ const TaskModal: React.FC<TaskModalProps> = ({
                   ) : mentorOptions.length === 0 ? (
                     <MenuItem disabled>No mentors found</MenuItem>
                   ) : (
-                    mentorOptions.map((mentor) => (
-                      <MenuItem key={mentor.id} value={mentor.id}>
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Avatar src={mentor.avatar} sx={{ width: 24, height: 24 }} />
-                          <Typography>
-                            {mentor.firstName} {mentor.lastName}
-                          </Typography>
-                        </Stack>
-                      </MenuItem>
-                    ))
+                    [
+                      <MenuItem key="none" value="">
+                        <Typography color="text.secondary">None</Typography>
+                      </MenuItem>,
+                      ...mentorOptions.map((mentor) => (
+                        <MenuItem key={mentor.id} value={mentor.id}>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Avatar src={mentor.avatar} sx={{ width: 24, height: 24 }} />
+                            <Typography>
+                              {mentor.firstName} {mentor.lastName}
+                            </Typography>
+                          </Stack>
+                        </MenuItem>
+                      )),
+                    ]
                   )}
                 </Select>
               </FormControl>

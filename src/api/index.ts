@@ -16,4 +16,19 @@ API.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('_id');
+      localStorage.removeItem('needsPasswordChange');
+
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  },
+);
+
 export default API;

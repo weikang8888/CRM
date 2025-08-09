@@ -5,6 +5,7 @@ import Topbar from 'layouts/main-layout/topbar';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from 'store';
 import { fetchProfile } from 'store/profileSlice';
+import { fetchNotificationList } from 'store/notificationSlice';
 
 const MainLayout = ({ children }: PropsWithChildren) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -15,9 +16,25 @@ const MainLayout = ({ children }: PropsWithChildren) => {
   const { data: profile, loading: profileLoading } = useSelector(
     (state: RootState) => state.profile,
   );
+
+  const { data: notifications, loading: notificationsLoading } = useSelector(
+    (state: RootState) => state.notifications.notifications,
+  );
+
   useEffect(() => {
     if (!profile && !profileLoading) dispatch(fetchProfile());
   }, [dispatch, profile, profileLoading]);
+
+  useEffect(() => {
+    if (profile?._id && !notifications && !notificationsLoading) {
+      const role = localStorage.getItem('role');
+      if (role === 'Admin') {
+        dispatch(fetchNotificationList({}));
+      } else {
+        dispatch(fetchNotificationList({ userId: profile._id }));
+      }
+    }
+  }, [dispatch, profile?._id, notifications, notificationsLoading]);
 
   return (
     <Stack width={1} minHeight="100vh">

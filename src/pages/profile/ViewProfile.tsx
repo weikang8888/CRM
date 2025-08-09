@@ -13,13 +13,14 @@ import {
   MenuItem,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { ProfileResponse, editProfile, getPositions } from 'api/profile/profile';
+import { ProfileResponse, editProfile } from 'api/profile/profile';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from 'store';
 import { fetchProfile } from 'store/profileSlice';
 import { uploadPhoto } from 'api/upload/upload';
+import { fetchPositions } from 'store/profileSlice';
 
 const ViewProfile: React.FC = () => {
   const userRole = typeof window !== 'undefined' ? localStorage.getItem('role') : undefined;
@@ -27,12 +28,10 @@ const ViewProfile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValues, setEditValues] = useState<ProfileResponse | null>(null);
   const [avatar, setAvatar] = useState<File | string | undefined>(undefined);
-  const [positions, setPositions] = useState<string[]>([]);
-  const [positionsLoading, setPositionsLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
-  const { data: profile, loading } = useSelector((state: RootState) => state.profile);
+  const { data: profile, loading, positions, positionsLoading } = useSelector((state: RootState) => state.profile);
 
   useEffect(() => {
     if (!profile && !loading) {
@@ -46,12 +45,11 @@ const ViewProfile: React.FC = () => {
 
   useEffect(() => {
     if (isEditing && (userRole === 'Mentor' || userRole === 'Member')) {
-      setPositionsLoading(true);
-      getPositions()
-        .then((data) => setPositions(data))
-        .finally(() => setPositionsLoading(false));
+      if (!positions.length && !positionsLoading) {
+        dispatch(fetchPositions());
+      }
     }
-  }, [isEditing, userRole]);
+  }, [isEditing, userRole, positions, positionsLoading, dispatch]);
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -252,6 +250,7 @@ const ViewProfile: React.FC = () => {
               </Typography>
               {isEditing ? (
                 <TextField
+                  type="date"
                   size="small"
                   value={editValues ? editValues.dateOfBirth : ''}
                   onChange={(e) => handleChange('dateOfBirth', e.target.value)}
@@ -290,6 +289,7 @@ const ViewProfile: React.FC = () => {
               </Typography>
               {isEditing ? (
                 <TextField
+                  type="tel"
                   size="small"
                   value={editValues ? editValues.phone : ''}
                   onChange={(e) => handleChange('phone', e.target.value)}
