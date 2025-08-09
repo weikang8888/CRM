@@ -5,10 +5,10 @@ import MainLayout from 'layouts/main-layout';
 import AuthLayout from 'layouts/auth-layout';
 import Splash from 'components/loader/Splash';
 import PageLoader from 'components/loader/PageLoader';
-import TaskList from 'pages/task/TaskList';
-import MentorList from 'pages/mentor/MentorList';
-import MemberList from 'pages/member/MemberList';
-import NotificationList from 'pages/notification/NotificationList';
+const TaskList = lazy(() => import('pages/task/TaskList'));
+const MentorList = lazy(() => import('pages/mentor/MentorList'));
+const MemberList = lazy(() => import('pages/member/MemberList'));
+const NotificationList = lazy(() => import('pages/notification/NotificationList'));
 
 const App = lazy(() => import('App'));
 const Dashboard = lazy(() => import('pages/dashboard'));
@@ -48,19 +48,35 @@ const router = createBrowserRouter(
             },
             {
               path: '/tasks-list',
-              element: <TaskList />,
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <TaskList />
+                </Suspense>
+              ),
             },
             {
               path: '/notifications',
-              element: <NotificationList />,
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <NotificationList />
+                </Suspense>
+              ),
             },
             {
               path: '/mentors-list',
-              element: <MentorList />,
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <MentorList />
+                </Suspense>
+              ),
             },
             {
               path: '/members-list',
-              element: <MemberList />,
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <MemberList />
+                </Suspense>
+              ),
             },
           ],
         },

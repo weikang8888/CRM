@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Grid,
-  Avatar,
-  Typography,
-  TextField,
-  Paper,
-  IconButton,
-  Button,
-  CircularProgress,
-  Select,
-  MenuItem,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import EditIcon from '@mui/icons-material/Edit';
 import { ProfileResponse, editProfile } from 'api/profile/profile';
 import { toast } from 'react-toastify';
