@@ -1,20 +1,23 @@
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Activity from 'components/sections/dashboard/activity';
-import TaskToday from 'components/sections/dashboard/task-today';
-import RunningTask from 'components/sections/dashboard/running-task';
-import UpcomingTask from 'components/sections/dashboard/upcoming-task';
-import WeekCalendar from 'components/sections/dashboard/week-calendar';
-import TaskOverview from 'components/sections/dashboard/task-overview';
-import MonthlyMentors from 'components/sections/dashboard/monthly-mentors';
 import Footer from 'components/common/Footer';
 import ChangePasswordModal from 'components/modal/ChangePasswordModal';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
+import { Skeleton } from '@mui/material';
 import { fetchMentors } from 'store/mentorSlice';
 import { AppDispatch, RootState } from 'store';
 import { fetchAllTasks } from 'store/taskSlice';
 import { fetchMembers } from 'store/memberSlice';
+
+// Lazy load dashboard components
+const Activity = lazy(() => import('components/sections/dashboard/activity'));
+const TaskToday = lazy(() => import('components/sections/dashboard/task-today'));
+const RunningTask = lazy(() => import('components/sections/dashboard/running-task'));
+const UpcomingTask = lazy(() => import('components/sections/dashboard/upcoming-task'));
+const WeekCalendar = lazy(() => import('components/sections/dashboard/week-calendar'));
+const TaskOverview = lazy(() => import('components/sections/dashboard/task-overview'));
+const MonthlyMentors = lazy(() => import('components/sections/dashboard/monthly-mentors'));
 
 const Dashboard = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -61,13 +64,23 @@ const Dashboard = () => {
             spacing={3.5}
             direction={{ xs: 'column', sm: 'row', md: 'column', xl: 'row' }}
           >
-            <RunningTask />
-            <Activity />
+            <Suspense fallback={<Skeleton variant="rounded" height={200} />}>
+              <RunningTask />
+            </Suspense>
+            <Suspense fallback={<Skeleton variant="rounded" height={200} />}>
+              <Activity />
+            </Suspense>
           </Stack>
 
-          <MonthlyMentors />
-          <UpcomingTask />
-          <TaskOverview />
+          <Suspense fallback={<Skeleton variant="rounded" height={300} />}>
+            <MonthlyMentors />
+          </Suspense>
+          <Suspense fallback={<Skeleton variant="rounded" height={400} />}>
+            <UpcomingTask />
+          </Suspense>
+          <Suspense fallback={<Skeleton variant="rounded" height={500} />}>
+            <TaskOverview />
+          </Suspense>
 
           <Box display={{ xs: 'none', md: 'block' }}>
             <Footer />
@@ -90,8 +103,12 @@ const Dashboard = () => {
           }}
         >
           <Stack p={3.5} spacing={3.5} width={1} direction="column">
-            <WeekCalendar />
-            <TaskToday />
+            <Suspense fallback={<Skeleton variant="rounded" height={300} />}>
+              <WeekCalendar />
+            </Suspense>
+            <Suspense fallback={<Skeleton variant="rounded" height={200} />}>
+              <TaskToday />
+            </Suspense>
           </Stack>
 
           <Box display={{ xs: 'block', md: 'none' }}>

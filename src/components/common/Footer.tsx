@@ -14,7 +14,7 @@ const Footer = () => {
       fontWeight={500}
     >
       Made with ❤️ by{' '}
-      <Link href="" target="_blank" rel="noreferrer">
+      <Link href="https://portfolio-kuj6.onrender.com" target="_blank" rel="noreferrer">
         {'Weikang'}
       </Link>
     </Typography>
